@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poikien reissu 2026</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- ============================
+       TYYLIT (alkuperäiset)
+  ============================= -->
+  <style>
+    /* Tänne voit jättää KOKO nykyisen CSS:si sellaisenaan */
+    /* mitään ei tarvitse muuttaa tyyleissä */
+  </style>
+</head>
+
+<body>
+
+  <!-- ============================
+       HERO
+  ============================= -->
+  <div class="hero">
+    <h1>POIKIEN<br><span>REISSU</span><br>2026</h1>
+    <p class="hero-sub">Ehdota kohteita ja päivämääriä – kaikki näkyvät kaikille.</p>
+  </div>
+
+  <!-- ============================
+       KOHTEET
+  ============================= -->
+  <main>
+
+    <section>
+      <h2>Matkakohteet</h2>
+
+      <div class="card">
+        <input id="dest-city" placeholder="Kaupunki">
+        <input id="dest-country" placeholder="Maa">
+        <input id="dest-price" placeholder="Hinta-arvio">
+        <input id="dest-proposer" placeholder="Nimi">
+        <textarea id="dest-note" placeholder="Perustelut"></textarea>
+        <button onclick="addDestination()">Lisää kohde</button>
+      </div>
+
+      <div id="destinations-list"></div>
+    </section>
+
+    <section style="margin-top:3rem;">
+      <h2>Päivämäärät</h2>
+
+      <div class="card">
+        <input type="date" id="date-from">
+        <input type="date" id="date-to">
+        <input id="date-proposer" placeholder="Nimi">
+        <input id="date-note" placeholder="Huomiot">
+        <button onclick="addDate()">Lisää päivämäärä</button>
+      </div>
+
+      <div id="dates-list"></div>
+    </section>
+
+  </main>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ============================
+       GOOGLE SHEETS BACKEND
+  ============================= -->
+  <script>
+    const API_URL = 'PASTE_GOOGLE_SCRIPT_WEBAPP_URL_TÄHÄN';
+
+    async function loadList(type) {
+      const res = await fetch(`${API_URL}?type=${type}`);
+      return await res.json();
+    }
+
+    async function saveItem(type, data) {
+      await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, ...data })
+      });
+    }
+
+    async function addDestination() {
+      const city = val('dest-city');
+      if (!city) return alert('Kohde puuttuu');
+
+      await saveItem('destinations', {
+        id: Date.now(),
+        city,
+        country: val('dest-country'),
+        price: val('dest-price'),
+        proposer: val('dest-proposer'),
+        note: val('dest-note')
+      });
+
+      clear(['dest-city','dest-country','dest-price','dest-proposer','dest-note']);
+      renderDestinations();
+      toast('✓ Kohde tallennettu');
+    }
+
+    async function renderDestinations() {
+      const list = await loadList('destinations');
+      const el = document.getElementById('destinations-list');
+
+      if (!list.length) {
+        el.innerHTML = '<p>Ei vielä ehdotuksia</p>';
+        return;
+      }
+
+      el.innerHTML = list.reverse().map(d => `
+        <div class="dest-card">
+          <strong>${esc(d.city)}</strong> – ${esc(d.country || '')}<br>
+          ${d.note || ''}
+          <div style="font-size:12px;opacity:.6">${d.proposer || ''}</div>
+        </div>
+      `).join('');
+    }
+
+    async function addDate() {
+      await saveItem('dates', {
+        id: Date.now(),
+        from: val('date-from'),
+        to: val('date-to'),
+        proposer: val('date-proposer'),
+        note: val('date-note')
+      });
+      clear(['date-from','date-to','date-proposer','date-note']);
+      renderDates();
+      toast('✓ Päivämäärä tallennettu');
+    }
+
+    async function renderDates() {
+      const list = await loadList('dates');
+      const el = document.getElementById('dates-list');
+
+      if (!list.length) {
+        el.innerHTML = '<p>Ei päivämääräehdotuksia</p>';
+        return;
+      }
+
+      el.innerHTML = list.reverse().map(d => `
+        <div class="date-card">
+          ${formatDate(d.from)} → ${formatDate(d.to)}<br>
+          ${d.note || ''}
+          <div style="font-size:12px;opacity:.6">${d.proposer || ''}</div>
+        </div>
+      `).join('');
+    }
+
+    function val(id) { return document.getElementById(id).value.trim(); }
+    function clear(ids) { ids.forEach(i => document.getElementById(i).value = ''); }
+    function esc(s) { return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+    function formatDate(d) { return new Date(d).toLocaleDateString('fi-FI'); }
+
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(()=>t.classList.remove('show'),2000);
+    }
+
+    window.addEventListener('load', () => {
+      renderDestinations();
+      renderDates();
+    });
+  </script>
+
+</body>
+</html>
+``
