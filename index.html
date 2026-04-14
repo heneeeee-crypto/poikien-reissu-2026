@@ -1,1297 +1,272 @@
 <!DOCTYPE html>
 <html lang="fi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Poikien reissu 2026</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  /* =============================================
-     CSS-MUUTTUJAT — väripaletti ja yleiset arvot
-     ============================================= */
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Poikien reissu 2026</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
   :root {
-    --bg: #0d0f14;           /* taustaväri */
-    --surface: #161920;      /* korttien tausta */
-    --surface2: #1e222d;     /* syöttökenttien tausta */
-    --border: rgba(255,255,255,0.07);
-    --accent: #f5a623;       /* oranssi pääväri */
-    --text: #f0ede8;
-    --muted: #6b7280;        /* harmaa aputeksti */
-    --green: #22c55e;
-    --red: #ef4444;
+    --bg:#0d0f14;
+    --surface:#161920;
+    --surface2:#1e222d;
+    --border:rgba(255,255,255,.07);
+    --accent:#f5a623;
+    --text:#f0ede8;
+    --muted:#6b7280;
+    --green:#22c55e;
+    --red:#ef4444;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"DM Sans",sans-serif;
+    background:var(--bg);color:var(--text)
   }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  /* === LOGIN === */
+  #login-overlay{
+    position:fixed;inset:0;
+    background:var(--bg);
+    display:flex;align-items:center;justify-content:center;
+    z-index:9999
+  }
+  .login-box{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:2.5rem;
+    width:100%;max-width:380px;
+    text-align:center
+  }
+  .login-title{font-family:"Bebas Neue";font-size:2.8rem;color:var(--accent)}
+  .login-input{
+    width:100%;margin:1rem 0;
+    padding:12px;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    color:var(--text);
+    text-align:center;
+    letter-spacing:.15em
+  }
+  .login-btn{
+    width:100%;padding:12px;
+    background:var(--accent);
+    border:none;border-radius:10px;
+    cursor:pointer
+  }
+  .login-error{display:none;color:var(--red);font-size:13px}
+  .login-error.show{display:block}
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
+  /* === HERO === */
+  .hero{text-align:center;padding:5rem 2rem}
+  .hero h1{font-family:"Bebas Neue";font-size:6rem;line-height:.9}
+  .hero span{color:var(--accent)}
+  .logout-btn{
+    background:transparent;border:1px solid var(--border);
+    color:var(--muted);cursor:pointer
   }
 
-  /* =============================================
-     KIRJAUTUMISRUUTU — peittää koko sivun
-     ============================================= */
-  #login-overlay {
-    position: fixed;
-    inset: 0;
-    background: var(--bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    padding: 2rem;
+  /* === TABS === */
+  .tabs{display:flex;justify-content:center;margin-bottom:2rem}
+  .tab{
+    padding:10px 24px;border:none;cursor:pointer;
+    background:var(--surface);color:var(--muted)
+  }
+  .tab.active{background:var(--accent);color:#000}
+
+  main{max-width:900px;margin:0 auto;padding:0 1.5rem 4rem}
+  .section{display:none}
+  .section.active{display:block}
+
+  .section-title{
+    font-family:"Bebas Neue";font-size:2.2rem;
+    color:var(--accent);margin-bottom:1.5rem
   }
 
-  .login-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 2.5rem 2rem;
-    width: 100%;
-    max-width: 380px;
-    text-align: center;
-    animation: fadeUp 0.4s ease;
+  /* === CARDS === */
+  .dest-card,.date-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:1.25rem 1.5rem;
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:1rem;
+    margin-bottom:.75rem;
+    transition:.15s
+  }
+  .dest-card:hover,.date-card:hover{
+    transform:translateY(-2px);
+    border-color:rgba(245,166,35,.3)
   }
 
-  /* Sisääntuloanimaatio kirjautumislaatikolle */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
+  .dest-name{font-family:"Bebas Neue";font-size:1.6rem}
+  .dest-meta{font-size:13px;color:var(--muted)}
+  .dest-note{font-size:13px;margin-top:6px}
+  .dest-proposer{
+    font-size:11px;font-family:"DM Mono";
+    color:var(--accent);margin-top:4px
   }
 
-  .login-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2.8rem;
-    letter-spacing: 0.05em;
-    color: var(--accent);
-    line-height: 1;
-    margin-bottom: 0.25rem;
+  .vote-col{text-align:center;min-width:60px}
+  .vote-count{font-family:"Bebas Neue";font-size:2.2rem;color:var(--accent)}
+  .vote-label{font-size:10px;color:var(--muted)}
+  .vote-btn{
+    margin-top:6px;
+    border:1px solid var(--border);
+    background:none;color:var(--muted);
+    cursor:pointer;border-radius:6px;
+    padding:4px 10px;transition:.15s
+  }
+  .vote-btn.voted{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#000
   }
 
-  .login-sub {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 1.75rem;
+  .badge{
+    font-size:10px;padding:2px 8px;border-radius:4px;
+    font-family:"DM Mono"
+  }
+  .badge-orange{background:rgba(245,166,35,.12);color:var(--accent)}
+  .badge-green{background:rgba(34,197,94,.12);color:#22c55e}
+
+  .btn-danger{
+    opacity:0;pointer-events:none;
+    transition:.15s
+  }
+  .dest-card:hover .btn-danger{
+    opacity:1;pointer-events:auto
   }
 
-  /* Salasanakentän tyyli */
-  .login-input {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 15px;
-    padding: 12px 16px;
-    outline: none;
-    text-align: center;
-    letter-spacing: 0.15em;
-    transition: border-color 0.2s;
-    margin-bottom: 1rem;
+  .empty{text-align:center;padding:3rem;color:var(--muted)}
+  .empty-icon{font-size:3rem;opacity:.35}
+
+  .toast{
+    position:fixed;bottom:2rem;right:2rem;
+    background:var(--green);color:#000;
+    padding:12px 20px;border-radius:10px;
+    transform:translateY(100px);opacity:0;
+    transition:.3s
   }
-
-  .login-input:focus { border-color: var(--accent); }
-
-  /* Virheilmoitus väärästä salasanasta */
-  .login-error {
-    font-size: 13px;
-    color: var(--red);
-    margin-bottom: 0.75rem;
-    min-height: 18px;
-    display: none;
-  }
-
-  .login-error.show { display: block; }
-
-  /* Kirjaudu-nappi */
-  .login-btn {
-    width: 100%;
-    padding: 12px;
-    background: var(--accent);
-    color: #000;
-    border: none;
-    border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .login-btn:hover { background: #e09210; transform: translateY(-1px); }
-
-  .lock-icon { font-size: 2rem; margin-bottom: 0.75rem; }
-
-  /* =============================================
-     HERO-OSIO — sivun yläosa otsikolla
-     ============================================= */
-  .hero {
-    position: relative;
-    text-align: center;
-    padding: 5rem 2rem 3rem;
-    overflow: hidden;
-  }
-
-  /* Taustan hehku-efekti */
-  .hero::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(245,166,35,0.12) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .hero-eyebrow {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 1rem;
-  }
-
-  .hero h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(4rem, 12vw, 9rem);
-    line-height: 0.9;
-    letter-spacing: 0.02em;
-    color: var(--text);
-    margin-bottom: 1rem;
-  }
-
-  .hero h1 span { color: var(--accent); }
-
-  .hero-sub {
-    font-size: 15px;
-    color: var(--muted);
-    max-width: 420px;
-    margin: 0 auto 1.5rem;
-    line-height: 1.6;
-  }
-
-  /* Uloskirjaudu-nappi hero-osiossa */
-  .logout-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-size: 12px;
-    font-family: 'DM Mono', monospace;
-    padding: 6px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.15s;
-    letter-spacing: 0.05em;
-  }
-
-  .logout-btn:hover { border-color: var(--red); color: var(--red); }
-
-  /* =============================================
-     VÄLILEHTINAVIGAATIO
-     ============================================= */
-  .tabs {
-    display: flex;
-    justify-content: center;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    width: fit-content;
-    margin: 0 auto 3rem;
-    background: var(--surface);
-  }
-
-  .tab {
-    padding: 10px 24px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    background: none;
-    border: none;
-    color: var(--muted);
-    transition: all 0.2s;
-    font-family: 'DM Sans', sans-serif;
-    letter-spacing: 0.02em;
-  }
-
-  .tab.active { background: var(--accent); color: #000; }
-  .tab:hover:not(.active) { color: var(--text); }
-
-  /* =============================================
-     PÄÄSISÄLTÖALUE
-     ============================================= */
-  main { max-width: 900px; margin: 0 auto; padding: 0 1.5rem 4rem; }
-
-  /* Välilehtien sisällöt — piilotettu oletuksena */
-  .section { display: none; }
-  .section.active { display: block; }
-
-  /* Osion otsikko */
-  .section-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2.2rem;
-    letter-spacing: 0.05em;
-    color: var(--accent);
-    margin-bottom: 1.5rem;
-  }
-
-  /* =============================================
-     KORTTIKOMPONENTTI
-     ============================================= */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-  }
-
-  /* =============================================
-     LOMAKE-ELEMENTIT
-     ============================================= */
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-  @media(max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
-  .form-group { display: flex; flex-direction: column; gap: 6px; }
-
-  label {
-    font-size: 11px;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  input, textarea, select {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    padding: 10px 14px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
-  textarea { resize: vertical; min-height: 80px; }
-  select option { background: var(--surface2); }
-
-  /* =============================================
-     NAPIT
-     ============================================= */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 11px 24px;
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    border: none;
-    transition: all 0.15s;
-  }
-
-  .btn-primary { background: var(--accent); color: #000; }
-  .btn-primary:hover { background: #e09210; transform: translateY(-1px); }
-  .btn-danger { background: transparent; border: 1px solid rgba(239,68,68,0.3); color: var(--red); font-size: 12px; padding: 6px 12px; }
-  .btn-danger:hover { background: rgba(239,68,68,0.1); }
-  .btn-small { padding: 7px 16px; font-size: 13px; }
-
-  /* =============================================
-     ÄÄNESTYSNAPPI
-     ============================================= */
-  .vote-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    border-radius: 6px;
-    padding: 4px 10px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-family: 'DM Mono', monospace;
-  }
-
-  .vote-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .vote-btn.voted { background: var(--accent); border-color: var(--accent); color: #000; }
-
-  /* =============================================
-     KOHDE-KORTTI
-     ============================================= */
-  .dest-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 1.25rem 1.5rem;
-    margin-bottom: 0.75rem;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 1rem;
-    align-items: start;
-    transition: border-color 0.2s;
-    animation: fadeUp 0.3s ease;
-  }
-
-  .dest-card:hover { border-color: rgba(245,166,35,0.3); }
-  .dest-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 0.04em; line-height: 1; }
-  .dest-meta { font-size: 13px; color: var(--muted); margin-top: 4px; }
-  .dest-note { font-size: 13px; color: var(--text); margin-top: 8px; line-height: 1.5; }
-  .dest-proposer { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: 0.05em; margin-top: 6px; }
-  .vote-count { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--accent); line-height: 1; text-align: center; }
-  .vote-label { font-size: 10px; color: var(--muted); text-align: center; letter-spacing: 0.1em; font-family: 'DM Mono', monospace; }
-  .vote-col { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 60px; }
-
-  /* =============================================
-     PÄIVÄMÄÄRÄKORTTI
-     ============================================= */
-  .date-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 1.25rem 1.5rem;
-    margin-bottom: 0.75rem;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 1rem;
-    align-items: center;
-    transition: border-color 0.2s;
-    animation: fadeUp 0.3s ease;
-  }
-
-  .date-card:hover { border-color: rgba(245,166,35,0.3); }
-  .date-range { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 0.04em; }
-  .date-nights { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
-
-  /* =============================================
-     HAKUKORTIT
-     ============================================= */
-  .search-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
-
-  .search-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1.25rem;
-    text-decoration: none;
-    color: var(--text);
-    transition: all 0.2s;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .search-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-  .search-icon { font-size: 1.6rem; }
-  .search-name { font-weight: 500; font-size: 15px; }
-  .search-desc { font-size: 12px; color: var(--muted); line-height: 1.4; }
-  .search-tag { display: inline-block; font-size: 10px; font-family: 'DM Mono', monospace; background: rgba(245,166,35,0.12); color: var(--accent); padding: 2px 8px; border-radius: 4px; letter-spacing: 0.05em; margin-top: auto; }
-
-  /* =============================================
-     TYHJÄ TILA
-     ============================================= */
-  .empty { text-align: center; padding: 3rem 1rem; color: var(--muted); }
-  .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.5; }
-  .empty p { font-size: 14px; line-height: 1.6; }
-
-  /* Tunnisteet */
-  .badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 4px; font-family: 'DM Mono', monospace; letter-spacing: 0.05em; }
-  .badge-orange { background: rgba(245,166,35,0.12); color: var(--accent); }
-  .badge-green { background: rgba(34,197,94,0.12); color: #22c55e; }
-
-  /* Vaakaviiva */
-  .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
-
-  /* =============================================
-     LATAUSINDIKAATTORI
-     ============================================= */
-  .loading {
-    text-align: center;
-    padding: 2rem;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    display: none;
-  }
-
-  .loading.show { display: block; }
-
-  /* Pyörivä latausympyrä */
-  .spinner {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    margin-right: 8px;
-    vertical-align: middle;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* =============================================
-     ILMOITUSPALKKI (toast)
-     ============================================= */
-  .toast {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    background: var(--green);
-    color: #000;
-    padding: 12px 20px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 500;
-    transform: translateY(100px);
-    opacity: 0;
-    transition: all 0.3s;
-    z-index: 999;
-  }
-
-  .toast.show { transform: translateY(0); opacity: 1; }
-
-  .footer {
-    text-align: center;
-    padding: 2rem;
-    font-size: 12px;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    border-top: 1px solid var(--border);
-  }
-
-  .flex-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-</style>
+  .toast.show{transform:none;opacity:1}
+  </style>
 </head>
+
 <body>
 
-<!-- =============================================
-     KIRJAUTUMISIKKUNA
-     Peittää koko sivun ennen sisäänkirjautumista.
-     Piilotetaan onnistuneen kirjautumisen jälkeen.
-     ============================================= -->
+<!-- LOGIN -->
 <div id="login-overlay">
   <div class="login-box">
-    <div class="lock-icon">🔒</div>
     <div class="login-title">POIKIEN<br>REISSU</div>
-    <div class="login-sub">Syötä salasana päästäksesi sisään</div>
-    <!-- Enter-näppäin käynnistää kirjautumisen -->
-    <input
-      class="login-input"
-      type="password"
-      id="login-input"
-      placeholder="••••••••••••"
-      onkeydown="if(event.key==='Enter') doLogin()"
-
-      autocomplete="current-password"
-    />
-    <!-- Virheilmoitus — näkyy vain väärän salasanan jälkeen -->
-    <div class="login-error" id="login-error">Väärä salasana. Yritä uudelleen.</div>
-    <button class="login-btn" onclick="doLogin()">Kirjaudu sisään →</button>
+    <input class="login-input" id="login-input" type="password"
+           placeholder="********" onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="login-error" id="login-error">Väärä salasana</div>
+    <button class="login-btn" onclick="doLogin()">Kirjaudu</button>
   </div>
 </div>
 
-<!-- =============================================
-     HERO-OSIO
-     ============================================= -->
+<!-- HERO -->
 <div class="hero">
-  <div class="hero-eyebrow">✈ Reissua pukkaa</div>
   <h1>POIKIEN<br><span>REISSU</span><br>2026</h1>
-  <p class="hero-sub">Ehdota kohdetta, äänestä suosikkiasi ja etsi lennot & majoitus. Ehdotukset näkyvät kaikille.</p>
-  <button class="logout-btn" onclick="doLogout()">🔓 Kirjaudu ulos</button>
+  <button class="logout-btn" onclick="doLogout()">Kirjaudu ulos</button>
 </div>
 
-<!-- =============================================
-     VÄLILEHDET
-     ============================================= -->
+<!-- TABS -->
 <div class="tabs">
-  <button class="tab active" onclick="showTab('destinations', this)">🗺 Kohteet</button>
-  <button class="tab" onclick="showTab('dates', this)">📅 Päivämäärät</button>
-  <button class="tab" onclick="showTab('search', this)">🔍 Hae matkoja</button>
+  <button class="tab active" onclick="showTab('destinations',this)">🗺 Kohteet</button>
+  <button class="tab" onclick="showTab('dates',this)">📅 Päivämäärät</button>
 </div>
 
 <main>
-
-  <!-- =============================================
-       VÄLILEHTI 1: MATKAKOHTEET
-       ============================================= -->
   <div id="tab-destinations" class="section active">
     <div class="section-title">Matkakohteet</div>
-
-    <!-- Lomake uuden kohde-ehdotuksen lisäämiseen -->
-    <div class="card">
-      <div style="font-size:11px; color:var(--muted); margin-bottom:1rem; font-family:'DM Mono',monospace; letter-spacing:0.05em; text-transform:uppercase;">+ Ehdota uutta kohdetta</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Kohde</label>
-          <input type="text" id="dest-city" placeholder="esim. Gdańsk" />
-        </div>
-        <div class="form-group">
-          <label>Maa</label>
-          <input type="text" id="dest-country" placeholder="esim. Kånädå" />
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Arvioitu hinta / hlö</label>
-          <input type="text" id="dest-price" placeholder="esim. 400–600€" />
-        </div>
-        <div class="form-group">
-          <label>Ehdottajan nimi</label>
-          <input type="text" id="dest-proposer" placeholder="Ehdottaja" />
-        </div>
-      </div>
-      <div class="form-group" style="margin-bottom:1rem;">
-        <label>Perustelut</label>
-        <textarea id="dest-note" placeholder="Miksi tämä kohde? Mitä siellä tehdään?"></textarea>
-      </div>
-      <button class="btn btn-primary" onclick="addDestination()">Lisää ehdotus →</button>
-    </div>
-
-    <!-- Latausindikaattori — näkyy pilvihakujen ajan -->
-    <div class="loading" id="dest-loading"><span class="spinner"></span>Ladataan ehdotuksia...</div>
-    <div class="divider"></div>
-    <!-- Kohteiden lista injektoidaan tänne JS:llä -->
     <div id="destinations-list"></div>
   </div>
 
-  <!-- =============================================
-       VÄLILEHTI 2: PÄIVÄMÄÄRÄT
-       ============================================= -->
   <div id="tab-dates" class="section">
     <div class="section-title">Päivämäärät</div>
-
-    <!-- Lomake uuden päivämääräehdotuksen lisäämiseen -->
-    <div class="card">
-      <div style="font-size:11px; color:var(--muted); margin-bottom:1rem; font-family:'DM Mono',monospace; letter-spacing:0.05em; text-transform:uppercase;">+ Ehdota aikaikkunaa</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Lähtöpäivä</label>
-          <input type="date" id="date-from" />
-        </div>
-        <div class="form-group">
-          <label>Paluupäivä</label>
-          <input type="date" id="date-to" />
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Ehdottajan nimi</label>
-          <input type="text" id="date-proposer" placeholder="Nimesi" />
-        </div>
-        <div class="form-group">
-          <label>Huomiot</label>
-          <input type="text" id="date-note" placeholder="esim. perjantai ei onnistu" />
-        </div>
-      </div>
-      <button class="btn btn-primary" onclick="addDate()">Lisää ehdotus →</button>
-    </div>
-
-    <div class="loading" id="dates-loading"><span class="spinner"></span>Ladataan ehdotuksia...</div>
-    <div class="divider"></div>
-    <!-- Päivämäärien lista injektoidaan tänne JS:llä -->
     <div id="dates-list"></div>
   </div>
-
-  <!-- =============================================
-       VÄLILEHTI 3: HAE MATKOJA
-       ============================================= -->
-  <div id="tab-search" class="section">
-    <div class="section-title">Etsi lentoja & majoitusta</div>
-
-    <!-- Hakuasetukset-lomake -->
-    <div class="card" style="margin-bottom:1.5rem;">
-      <div style="font-size:11px; color:var(--muted); margin-bottom:1rem; font-family:'DM Mono',monospace; letter-spacing:0.05em; text-transform:uppercase;">Hakuasetukset</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Lähtökaupunki</label>
-          <input type="text" id="search-from" placeholder="Helsinki" value="Helsinki" />
-        </div>
-        <div class="form-group">
-          <label>Kohde</label>
-          <input type="text" id="search-to" placeholder="Barcelona" />
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Lähtö</label>
-          <input type="date" id="search-depart" />
-        </div>
-        <div class="form-group">
-          <label>Paluu</label>
-          <input type="date" id="search-return" />
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Matkustajia</label>
-          <input type="number" id="search-pax" value="4" min="1" max="20" />
-        </div>
-        <div class="form-group">
-          <label>Huoneita</label>
-          <input type="number" id="search-rooms" value="2" min="1" max="10" />
-        </div>
-      </div>
-      <button class="btn btn-primary" onclick="buildLinks()" style="margin-top:0.5rem;">Luo hakusuorat →</button>
-    </div>
-
-    <!-- Dynaamiset hakusuorat — näytetään kun käyttäjä painaa nappia -->
-    <div id="search-results-area" style="display:none;">
-      <div style="font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:0.05em; margin-bottom:1rem; color:var(--accent);">✈ LENNOT</div>
-      <div class="search-grid" id="flight-links"></div>
-      <div style="font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:0.05em; margin:1.5rem 0 1rem; color:var(--accent);">🏨 MAJOITUS</div>
-      <div class="search-grid" id="hotel-links"></div>
-    </div>
-
-    <!-- Vakiolinkit — näkyvät aina -->
-    <div class="divider"></div>
-    <div style="font-size:11px; color:var(--muted); margin-bottom:1rem; font-family:'DM Mono',monospace; letter-spacing:0.05em; text-transform:uppercase;">Yleiset hakupalvelut</div>
-    <div class="search-grid">
-      <a class="search-card" href="https://www.google.com/travel/flights" target="_blank">
-        <div class="search-icon">🔍</div><div class="search-name">Google Flights</div>
-        <div class="search-desc">Hintatrendit ja joustava kalenteri</div>
-        <div class="search-tag">LENNOT</div>
-      </a>
-      <a class="search-card" href="https://www.skyscanner.fi" target="_blank">
-        <div class="search-icon">🌐</div><div class="search-name">Skyscanner</div>
-        <div class="search-desc">Vertaa satoja lentoyhtiöitä</div>
-        <div class="search-tag">LENNOT</div>
-      </a>
-      <a class="search-card" href="https://www.momondo.fi" target="_blank">
-        <div class="search-icon">🗺</div><div class="search-name">Momondo</div>
-        <div class="search-desc">Löydä parhaat tarjoukset</div>
-        <div class="search-tag">LENNOT</div>
-      </a>
-      <a class="search-card" href="https://www.kayak.fi" target="_blank">
-        <div class="search-icon">🛩</div><div class="search-name">Kayak</div>
-        <div class="search-desc">Lennot + hotelli yhdistelmät</div>
-        <div class="search-tag">LENNOT + HOTELLI</div>
-      </a>
-      <a class="search-card" href="https://www.booking.com" target="_blank">
-        <div class="search-icon">🏨</div><div class="search-name">Booking.com</div>
-        <div class="search-desc">Laajin hotelli- ja asuntovalikoima</div>
-        <div class="search-tag">MAJOITUS</div>
-      </a>
-      <a class="search-card" href="https://www.airbnb.fi" target="_blank">
-        <div class="search-icon">🏠</div><div class="search-name">Airbnb</div>
-        <div class="search-desc">Vuokra-asunnot isolle porukalle</div>
-        <div class="search-tag">MAJOITUS</div>
-      </a>
-      <a class="search-card" href="https://www.hotels.com" target="_blank">
-        <div class="search-icon">⭐</div><div class="search-name">Hotels.com</div>
-        <div class="search-desc">Pisteet jokaisesta yöstä</div>
-        <div class="search-tag">MAJOITUS</div>
-      </a>
-      <a class="search-card" href="https://www.hostelworld.com" target="_blank">
-        <div class="search-icon">🎒</div><div class="search-name">Hostelworld</div>
-        <div class="search-desc">Edullisemmat vaihtoehdot</div>
-        <div class="search-tag">MAJOITUS</div>
-      </a>
-    </div>
-  </div>
-
 </main>
 
-<!-- Ilmoituspalkki — ponnahtaa esiin oikeaan alakulmaan -->
 <div class="toast" id="toast"></div>
 
-<div class="footer">POIKIEN REISSU 2026 — ehdotukset tallennetaan pilveen, näkyvät kaikille</div>
+<!-- ================= FIRESTORE JS ================= -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import {
+  getFirestore, collection, doc, addDoc,
+  deleteDoc, setDoc, onSnapshot,
+  query, orderBy,
+  serverTimestamp, updateDoc, increment
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-<!-- =============================================
-     JAVASCRIPT — kaikki logiikka kommentoituna
-     ============================================= -->
-<script>
+const app = initializeApp({
+  apiKey: "AIzaSyDUtCZzQ53DFfHj9Di84IdMLqz9jjLalkw",
+  authDomain: "reissu26.firebaseapp.com",
+  projectId: "reissu26"
+});
+const db = getFirestore(app);
 
-/* =============================================
-   KIRJAUTUMINEN
-   Salasana tarkistetaan selainpuolella.
-   Sessioavain tallennetaan sessionStorage:een —
-   se nollautuu automaattisesti kun välilehti suljetaan.
-   ============================================= */
-
-// Salasana on tallennettu SHA-256-tiivisteenä — alkuperäistä salasanaa
-// ei voi lukea suoraan lähdekoodista. Vertailu tehdään hashaamalla
-// käyttäjän syöte ja vertaamalla sitä tähän tiivisteeseen.
-const PASSWORD_HASH = 'fc4c0aa66633bd2701b103a7a0e1491dba2223b213c9f0902117967904ae44e2';
-
-// Tarkista sivun latautuessa onko käyttäjä jo kirjautunut tässä sessiossa
-function checkLogin() {
-  if (sessionStorage.getItem('pr2026_auth') === '1') {
-    // Kirjautunut — piilota kirjautumisikkuna ja käynnistä sovellus
-    document.getElementById('login-overlay').style.display = 'none';
+/* LOGIN */
+const HASH="fc4c0aa66633bd2701b103a7a0e1491dba2223b213c9f0902117967904ae44e2";
+async function sha256(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+window.doLogin=async()=>{
+  if(await sha256(login-input.value)===HASH){
+    sessionStorage.setItem("auth","1");
+    login-overlay.style.display="none";
     init();
-  }
-  // Muutoin kirjautumisikkuna jää näkyviin automaattisesti
+  }else login-error.classList.add("show");
+}
+window.doLogout=()=>{sessionStorage.clear();location.reload()};
+if(sessionStorage.getItem("auth")==="1"){login-overlay.style.display="none";init()}
+
+/* SESSION */
+function sid(){
+  let s=sessionStorage.getItem("sid");
+  if(!s){s=Math.random().toString(36)+Date.now();sessionStorage.setItem("sid",s)}
+  return s;
 }
 
-// SHA-256-tiivistefunktio — käyttää selaimen natiivia Web Crypto API:a.
-// Muuntaa merkkijonon heksadesimaaliseksi tiivisteeksi ilman ulkoisia kirjastoja.
-async function sha256(str) {
-  const buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
+/* TOAST */
+function toast(t){const x=toastEl;x.textContent=t;x.classList.add("show");setTimeout(()=>x.classList.remove("show"),2500)}
+const toastEl=document.getElementById("toast");
 
-// Käsittele kirjautumisyritys
-async function doLogin() {
-  const val  = document.getElementById('login-input').value;
-  const errEl = document.getElementById('login-error');
-
-  // Hashataan käyttäjän syöte ja verrataan tallennettuun tiivisteeseen
-  const inputHash = await sha256(val);
-  if (inputHash === PASSWORD_HASH) {
-    // Oikea salasana — tallennetaan sessio, piilotetaan kirjautumisruutu
-    sessionStorage.setItem('pr2026_auth', '1');
-    document.getElementById('login-overlay').style.display = 'none';
-    init();
-  } else {
-    // Väärä salasana — näytetään virheilmoitus, tyhjennetään kenttä
-    errEl.classList.add('show');
-    document.getElementById('login-input').value = '';
-    document.getElementById('login-input').focus();
-    // Piilotetaan virheilmoitus 3 sekunnin kuluttua
-    setTimeout(() => errEl.classList.remove('show'), 3000);
-  }
-}
-
-// Uloskirjautuminen — poistetaan sessio ja ladataan sivu uudelleen
-function doLogout() {
-  sessionStorage.removeItem('pr2026_auth');
-  location.reload();
-}
-
-/* =============================================
-   JAETTU TALLENNUS — JSONBin.io
-   Kaikki data tallennetaan JSONBin.io-palveluun
-   jossa se on kaikkien käyttäjien saatavilla
-   julkiselta URL-osoitteelta riippumatta.
-
-   Rakenne: yksi "bin" sisältää kaiken datan:
-   { destinations: [...], dates: [...],
-     votes_dest: [...], votes_date: [...] }
-   ============================================= */
-
-// JSONBin.io API-avain (Master Key)
-const JSONBIN_KEY = '$2a$10$vLR2ACJFUOl6ebjgSNh5A.2hbHQ3bSYULh32YchNa5..6O42BqzUO';
-
-// Bin-tunnus tallennetaan localStorageen ensimmäisen luonnin jälkeen.
-// Näin sama bin löytyy aina uudelleen eri istunnoilla ja laitteilla
-// — kunhan käyttäjä on kerran avannut sivun ja luonut binin.
-// TÄRKEÄÄ: jos jaat sivuston muille, lisää BIN_ID käsin alla olevaan
-// vakioon sen jälkeen kun olet ajanut sivuston ensimmäistä kertaa.
-const FIXED_BIN_ID = ''; // <-- täytä ensimmäisen ajon jälkeen (katso ohjeet)
-
-const JSONBIN_BASE = 'https://api.jsonbin.io/v3';
-
-// Hae tai luo bin-tunnus.
-// Järjestys: 1) kovakoodattu FIXED_BIN_ID, 2) localStorage, 3) luo uusi
-async function getBinId() {
-  if (FIXED_BIN_ID) return FIXED_BIN_ID;
-  const stored = localStorage.getItem('pr2026_bin_id');
-  if (stored) return stored;
-
-  // Luodaan uusi bin tyhjällä datalla
-  console.log('Luodaan uusi JSONBin...');
-  const res = await fetch(`${JSONBIN_BASE}/b`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Master-Key': JSONBIN_KEY,
-      'X-Bin-Name': 'Poikien reissu 2026',
-      'X-Bin-Private': 'false'   // julkinen — kaikki voivat lukea
-    },
-    body: JSON.stringify({ destinations: [], dates: [], votes_dest: [], votes_date: [] })
-  });
-
-  const data = await res.json();
-  const binId = data.metadata?.id;
-  if (!binId) throw new Error('Binin luonti epäonnistui');
-
-  // Tallennetaan bin-tunnus localStorageen tulevia sessioita varten
-  localStorage.setItem('pr2026_bin_id', binId);
-  console.log('✓ Uusi bin luotu. BIN ID:', binId,
-    '\nLisää tämä FIXED_BIN_ID-muuttujaan ja jaa se kavereiden kanssa!');
-  return binId;
-}
-
-// Välimuisti — vältetään turhat API-kutsut
-// JSONBin ilmaisversio sallii 10 000 pyyntöä/kk
-let _cache = null;
-
-// Lataa koko data-objekti JSONBinistä (tai välimuistista)
-async function loadAll() {
-  if (_cache) return _cache; // palautetaan välimuistista jos saatavilla
-
-  const binId = await getBinId();
-  const res   = await fetch(`${JSONBIN_BASE}/b/${binId}/latest`, {
-    headers: { 'X-Master-Key': JSONBIN_KEY }
-  });
-  const json = await res.json();
-  // JSONBin palauttaa datan record-kentässä
-  _cache = json.record || { destinations: [], dates: [], votes_dest: [], votes_date: [] };
-  return _cache;
-}
-
-// Tallenna koko data-objekti JSONBiniin
-async function saveAll(data) {
-  _cache = data; // päivitetään välimuisti heti
-  const binId = await getBinId();
-  await fetch(`${JSONBIN_BASE}/b/${binId}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Master-Key': JSONBIN_KEY
-    },
-    body: JSON.stringify(data)
+/* DESTINATIONS */
+const destCol=collection(db,"destinations");
+function init(){
+  onSnapshot(query(destCol,orderBy("votesCount","desc")),snap=>{
+    destinations-list.innerHTML=snap.empty
+      ?`<div class="empty"><div class="empty-icon">🗺</div><p>Ei ehdotuksia</p></div>`
+      :snap.docs.map((d,i)=>{
+        const x=d.data();
+        return `
+        <div class="dest-card">
+          <div>
+            ${i===0&&x.votesCount>0?`<span class="badge badge-orange">🔥 Suosituin</span>`:""}
+            ${x.price?` <span class="badge badge-green">~${x.price}</span>`:""}
+            <div class="dest-name">${x.city}</div>
+            <div class="dest-meta">${x.country||""}</div>
+            ${x.note?`<div class="dest-note">${x.note}</div>`:""}
+          </div>
+          <div class="vote-col">
+            <div class="vote-count">${x.votesCount||0}</div>
+            <div class="vote-label">ääntä</div>
+          </div>
+        </div>`;
+      }).join("");
   });
 }
-
-// Apufunktiot yksittäisten listojen lukemiseen ja tallentamiseen
-// KEYS-objekti määrittelee mitä kenttää JSONBin-datasta käytetään
-const KEYS = {
-  destinations: 'destinations',
-  dates:        'dates',
-  votes_dest:   'votes_dest',
-  votes_date:   'votes_date'
+window.showTab=(n,b)=>{
+  document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.getElementById("tab-"+n).classList.add("active");
+  b.classList.add("active");
 };
-
-async function cloudLoad(key) {
-  try {
-    const all = await loadAll();
-    return all[key] || [];
-  } catch (e) {
-    console.error('Lataus epäonnistui:', e);
-    return [];
-  }
-}
-
-// Tallenna data jaettuun pilvitallennukseen
-async function cloudSave(key, list) {
-  try {
-    const all = await loadAll();
-    all[key]  = list;
-    await saveAll(all);
-    _cache = null; // nollataan välimuisti — seuraava luku hakee tuoreet tiedot
-  } catch (e) {
-    console.error('Tallennus epäonnistui:', e);
-  }
-}
-
-/* =============================================
-   VÄLILEHDET
-   ============================================= */
-
-// Vaihda näkyvä välilehti
-function showTab(name, btn) {
-  // Piilota kaikki osiot
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  // Poista aktiivisuusmerkintä kaikilta välilehti-nappeilta
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  // Näytä valittu osio ja merkitse nappi aktiiviseksi
-  document.getElementById('tab-' + name).classList.add('active');
-  btn.classList.add('active');
-}
-
-/* =============================================
-   ILMOITUSPALKKI
-   ============================================= */
-
-// Näytä lyhyt ilmoitus oikeassa alakulmassa
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-/* =============================================
-   MATKAKOHTEET
-   ============================================= */
-
-// Lisää uusi kohde-ehdotus pilvivarastoon
-async function addDestination() {
-  const city     = document.getElementById('dest-city').value.trim();
-  const country  = document.getElementById('dest-country').value.trim();
-  const price    = document.getElementById('dest-price').value.trim();
-  const proposer = document.getElementById('dest-proposer').value.trim();
-  const note     = document.getElementById('dest-note').value.trim();
-
-  if (!city) { alert('Kirjoita kohteen nimi.'); return; }
-
-  // Haetaan nykyiset kohteet pilvestä
-  const list = await cloudLoad(KEYS.destinations);
-
-  // Lisätään uusi kohde listan alkuun (uusin ensin)
-  list.unshift({ id: Date.now(), city, country, price, proposer, note });
-
-  // Tallennetaan päivitetty lista pilvivarastoon
-  await cloudSave(KEYS.destinations, list);
-
-  // Tyhjennetään lomakekentät
-  ['dest-city','dest-country','dest-price','dest-note'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-
-  renderDestinations();
-  toast('✓ Kohde lisätty — näkyy nyt kaikille!');
-}
-
-// Poista kohde-ehdotus pilvestä
-async function deleteDestination(id) {
-  if (!confirm('Poistetaanko ehdotus?')) return;
-
-  // Suodatetaan poistettu kohde pois listasta
-  const list = (await cloudLoad(KEYS.destinations)).filter(d => d.id !== id);
-  await cloudSave(KEYS.destinations, list);
-
-  // Poistetaan myös kohteeseen liittyvät äänet
-  const votes = (await cloudLoad(KEYS.votes_dest)).filter(v => v.id !== id);
-  await cloudSave(KEYS.votes_dest, votes);
-
-  renderDestinations();
-  toast('Kohde poistettu.');
-}
-
-// Äänestä tai peru ääni kohteelta
-async function voteDestination(id) {
-  const votes = await cloudLoad(KEYS.votes_dest);
-  const sid   = getSessionId(); // tämän käyttäjän istuntotunniste
-
-  // Tarkistetaan onko tämä käyttäjä jo äänestänyt tätä kohdetta
-  const already = votes.find(v => v.id === id && v.sid === sid);
-
-  if (already) {
-    // Perutaan ääni — poistetaan oma äänimerkintä
-    await cloudSave(KEYS.votes_dest, votes.filter(v => !(v.id === id && v.sid === sid)));
-  } else {
-    // Lisätään ääni — tallennetaan kohteen id ja istuntotunniste
-    votes.push({ id, sid });
-    await cloudSave(KEYS.votes_dest, votes);
-  }
-
-  renderDestinations();
-}
-
-// Hae kohteet pilvestä ja renderoisi ne sivulle
-async function renderDestinations() {
-  // Näytetään latausindikaattori hakujen ajaksi
-  document.getElementById('dest-loading').classList.add('show');
-
-  const list      = await cloudLoad(KEYS.destinations);
-  const votes     = await cloudLoad(KEYS.votes_dest);
-  const sid       = getSessionId();
-  const container = document.getElementById('destinations-list');
-
-  document.getElementById('dest-loading').classList.remove('show');
-
-  // Tyhjä tila — ei ehdotuksia vielä
-  if (list.length === 0) {
-    container.innerHTML = '<div class="empty"><div class="empty-icon">🗺</div><p>Ei vielä ehdotuksia.<br>Ole ensimmäinen!</p></div>';
-    return;
-  }
-
-  // Lasketaan äänimäärät per kohde
-  const voteCounts = {};
-  votes.forEach(v => { voteCounts[v.id] = (voteCounts[v.id] || 0) + 1; });
-
-  // Järjestetään äänimäärän mukaan (eniten ääniä ensin)
-  const sorted  = [...list].sort((a, b) => (voteCounts[b.id] || 0) - (voteCounts[a.id] || 0));
-
-  // Tämän istunnon käyttäjän äänestämät kohteet
-  const myVotes = votes.filter(v => v.sid === sid).map(v => v.id);
-
-  // Rakennetaan HTML jokaista kohdetta varten
-  container.innerHTML = sorted.map((d, i) => {
-    const count = voteCounts[d.id] || 0;
-    const voted = myVotes.includes(d.id);
-    return `
-      <div class="dest-card">
-        <div>
-          <div class="flex-row" style="margin-bottom:4px;">
-            ${i === 0 && count > 0 ? '<span class="badge badge-orange">🔥 Suosituin</span>' : ''}
-            ${d.price ? `<span class="badge badge-green">~${escHtml(d.price)}</span>` : ''}
-          </div>
-          <div class="dest-name">${escHtml(d.city)}</div>
-          <div class="dest-meta">${escHtml(d.country || '')}</div>
-          ${d.note     ? `<div class="dest-note">${escHtml(d.note)}</div>` : ''}
-          ${d.proposer ? `<div class="dest-proposer">— ${escHtml(d.proposer)}</div>` : ''}
-          <div style="margin-top:10px;">
-            <button class="btn btn-danger btn-small" onclick="deleteDestination(${d.id})">Poista</button>
-          </div>
-        </div>
-        <div class="vote-col">
-          <div class="vote-count">${count}</div>
-          <div class="vote-label">ääntä</div>
-          <!-- Äänestysnappi — muuttuu oranssiksi kun käyttäjä on äänestänyt -->
-          <button class="vote-btn ${voted ? 'voted' : ''}" onclick="voteDestination(${d.id})">${voted ? '✓' : '▲'}</button>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-/* =============================================
-   PÄIVÄMÄÄRÄT
-   ============================================= */
-
-// Lisää päivämääräehdotus pilvivarastoon
-async function addDate() {
-  const from     = document.getElementById('date-from').value;
-  const to       = document.getElementById('date-to').value;
-  const proposer = document.getElementById('date-proposer').value.trim();
-  const note     = document.getElementById('date-note').value.trim();
-
-  // Validointi — molemmat päivämäärät vaaditaan
-  if (!from || !to)  { alert('Valitse molemmat päivämäärät.'); return; }
-  if (from >= to)    { alert('Paluupäivän pitää olla lähtöpäivän jälkeen.'); return; }
-
-  const list = await cloudLoad(KEYS.dates);
-  list.unshift({ id: Date.now(), from, to, proposer, note });
-  await cloudSave(KEYS.dates, list);
-
-  // Tyhjennetään lomake
-  document.getElementById('date-from').value  = '';
-  document.getElementById('date-to').value    = '';
-  document.getElementById('date-note').value  = '';
-
-  renderDates();
-  toast('✓ Päivämäärä lisätty — näkyy nyt kaikille!');
-}
-
-// Poista päivämääräehdotus
-async function deleteDate(id) {
-  if (!confirm('Poistetaanko ehdotus?')) return;
-
-  const list  = (await cloudLoad(KEYS.dates)).filter(d => d.id !== id);
-  await cloudSave(KEYS.dates, list);
-
-  // Poistetaan myös siihen liittyvät äänet
-  const votes = (await cloudLoad(KEYS.votes_date)).filter(v => v.id !== id);
-  await cloudSave(KEYS.votes_date, votes);
-
-  renderDates();
-  toast('Päivämäärä poistettu.');
-}
-
-// Äänestä päivämääräehdotusta
-async function voteDate(id) {
-  const votes = await cloudLoad(KEYS.votes_date);
-  const sid   = getSessionId();
-  const already = votes.find(v => v.id === id && v.sid === sid);
-
-  if (already) {
-    await cloudSave(KEYS.votes_date, votes.filter(v => !(v.id === id && v.sid === sid)));
-  } else {
-    votes.push({ id, sid });
-    await cloudSave(KEYS.votes_date, votes);
-  }
-
-  renderDates();
-}
-
-// Hae päivämäärät pilvestä ja renderoi ne
-async function renderDates() {
-  document.getElementById('dates-loading').classList.add('show');
-
-  const list      = await cloudLoad(KEYS.dates);
-  const votes     = await cloudLoad(KEYS.votes_date);
-  const sid       = getSessionId();
-  const container = document.getElementById('dates-list');
-
-  document.getElementById('dates-loading').classList.remove('show');
-
-  if (list.length === 0) {
-    container.innerHTML = '<div class="empty"><div class="empty-icon">📅</div><p>Ei vielä päivämääräehdotuksia.</p></div>';
-    return;
-  }
-
-  // Lasketaan äänimäärät
-  const voteCounts = {};
-  votes.forEach(v => { voteCounts[v.id] = (voteCounts[v.id] || 0) + 1; });
-
-  // Järjestetään äänimäärän mukaan
-  const sorted  = [...list].sort((a, b) => (voteCounts[b.id] || 0) - (voteCounts[a.id] || 0));
-  const myVotes = votes.filter(v => v.sid === sid).map(v => v.id);
-
-  container.innerHTML = sorted.map((d, i) => {
-    const count  = voteCounts[d.id] || 0;
-    const voted  = myVotes.includes(d.id);
-    // Lasketaan öiden lukumäärä lähtö- ja paluupäivän väliltä
-    const nights = nightsBetween(d.from, d.to);
-    return `
-      <div class="date-card">
-        <div>
-          <div class="flex-row" style="margin-bottom:4px;">
-            ${i === 0 && count > 0 ? '<span class="badge badge-orange">🔥 Suosituin</span>' : ''}
-          </div>
-          <div class="date-range">${formatDate(d.from)} → ${formatDate(d.to)}</div>
-          <div class="date-nights">${nights} yötä</div>
-          ${d.note     ? `<div class="dest-note" style="margin-top:6px;">${escHtml(d.note)}</div>` : ''}
-          ${d.proposer ? `<div class="dest-proposer">— ${escHtml(d.proposer)}</div>` : ''}
-          <div style="margin-top:10px;">
-            <button class="btn btn-danger btn-small" onclick="deleteDate(${d.id})">Poista</button>
-          </div>
-        </div>
-        <div class="vote-col">
-          <div class="vote-count">${count}</div>
-          <div class="vote-label">ääntä</div>
-          <button class="vote-btn ${voted ? 'voted' : ''}" onclick="voteDate(${d.id})">${voted ? '✓' : '▲'}</button>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-/* =============================================
-   HAKUSUORAT
-   Rakennetaan personoidut hakulinkit käyttäjän
-   syöttämien hakuparametrien perusteella.
-   ============================================= */
-
-function buildLinks() {
-  const from   = document.getElementById('search-from').value.trim() || 'Helsinki';
-  const to     = document.getElementById('search-to').value.trim();
-  const depart = document.getElementById('search-depart').value;
-  const ret    = document.getElementById('search-return').value;
-  const pax    = document.getElementById('search-pax').value   || 4;
-  const rooms  = document.getElementById('search-rooms').value || 2;
-  const enc    = encodeURIComponent;
-
-  // Lentopalveluiden linkit — parametrit injektoituna URL:iin
-  const flightLinks = [
-    {
-      name: 'Google Flights', icon: '🔍',
-      desc: `${from} → ${to || 'valittu kohde'}`,
-      url: `https://www.google.com/travel/flights/search?q=Flights+from+${enc(from)}+to+${enc(to || '')}`,
-      tag: 'LENNOT'
-    },
-    {
-      name: 'Skyscanner', icon: '🌐',
-      desc: `${pax} matkustajaa`,
-      url: `https://www.skyscanner.fi/transport/flights/${enc(from)}/${enc(to || '')}/${depart.replace(/-/g,'') || ''}/${ret.replace(/-/g,'') || ''}/?adults=${pax}`,
-      tag: 'LENNOT'
-    },
-    {
-      name: 'Momondo', icon: '🗺',
-      desc: 'Hintavertailu',
-      url: `https://www.momondo.fi/flight-search/${enc(from)}-${enc(to || 'anywhere')}/${depart || '2026-06-01'}/${ret || '2026-06-08'}/${pax}-adults`,
-      tag: 'LENNOT'
-    },
-    {
-      name: 'Kayak', icon: '🛩',
-      desc: 'Pakettitarjoukset',
-      url: `https://www.kayak.fi/flights/${enc(from)}-${enc(to || 'anywhere')}/${depart || ''}/${ret || ''}/${pax}adults`,
-      tag: 'LENNOT'
-    }
-  ];
-
-  // Majoituspalveluiden linkit — parametrit injektoituna URL:iin
-  const hotelLinks = [
-    {
-      name: 'Booking.com', icon: '🏨',
-      desc: `${rooms} huonetta, ${pax} hlö`,
-      url: `https://www.booking.com/searchresults.fi.html?ss=${enc(to || '')}&checkin=${depart || ''}&checkout=${ret || ''}&group_adults=${pax}&no_rooms=${rooms}`,
-      tag: 'MAJOITUS'
-    },
-    {
-      name: 'Airbnb', icon: '🏠',
-      desc: 'Asunto koko porukalle',
-      url: `https://www.airbnb.fi/s/${enc(to || 'anywhere')}/homes?checkin=${depart || ''}&checkout=${ret || ''}&adults=${pax}`,
-      tag: 'MAJOITUS'
-    },
-    {
-      name: 'Hotels.com', icon: '⭐',
-      desc: `${pax} henkilöä`,
-      url: `https://fi.hotels.com/search.do?q-destination=${enc(to || '')}&q-check-in=${depart || ''}&q-check-out=${ret || ''}&q-rooms=${rooms}&q-room-0-adults=${pax}`,
-      tag: 'MAJOITUS'
-    },
-    {
-      name: 'Hostelworld', icon: '🎒',
-      desc: 'Edulliset vaihtoehdot',
-      url: `https://www.hostelworld.com/findabed.php/ChosenCity.${enc(to || '')}`,
-      tag: 'MAJOITUS'
-    }
-  ];
-
-  // Renderoidaan lennot-kortit
-  document.getElementById('flight-links').innerHTML = flightLinks.map(l =>
-    `<a class="search-card" href="${l.url}" target="_blank">
-      <div class="search-icon">${l.icon}</div>
-      <div class="search-name">${l.name}</div>
-      <div class="search-desc">${l.desc}</div>
-      <div class="search-tag">${l.tag}</div>
-    </a>`
-  ).join('');
-
-  // Renderoidaan majoitus-kortit
-  document.getElementById('hotel-links').innerHTML = hotelLinks.map(l =>
-    `<a class="search-card" href="${l.url}" target="_blank">
-      <div class="search-icon">${l.icon}</div>
-      <div class="search-name">${l.name}</div>
-      <div class="search-desc">${l.desc}</div>
-      <div class="search-tag">${l.tag}</div>
-    </a>`
-  ).join('');
-
-  // Paljastetaan hakutulosten alue
-  document.getElementById('search-results-area').style.display = 'block';
-  toast('✓ Hakusuorat luotu!');
-}
-
-/* =============================================
-   APUFUNKTIOT
-   ============================================= */
-
-// Laske yöpymisten lukumäärä kahden päivämäärän välillä
-function nightsBetween(from, to) {
-  return Math.round((new Date(to) - new Date(from)) / 86400000);
-}
-
-// Muotoile päivämäärä suomalaiseen muotoon (esim. "15. kesäk. 2026")
-function formatDate(d) {
-  return new Date(d).toLocaleDateString('fi-FI', {
-    day: 'numeric', month: 'short', year: 'numeric'
-  });
-}
-
-// Suojaa käyttäjäsyötteet XSS-hyökkäyksiltä
-// muuntamalla HTML-erikoismerkit turvallisiksi entiteeteiksi
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-// Hae tai luo istuntokohtainen käyttäjätunniste.
-// Käytetään äänestyksissä tunnistamaan kenen ääni on kenen.
-// sessionStorage nollautuu kun selainvälilehti suljetaan.
-function getSessionId() {
-  let sid = sessionStorage.getItem('pr2026_sid');
-  if (!sid) {
-    // Luodaan satunnainen tunniste yhdistämällä kaksi satunnaislukua
-    sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
-    sessionStorage.setItem('pr2026_sid', sid);
-  }
-  return sid;
-}
-
-/* =============================================
-   KÄYNNISTYS
-   ============================================= */
-
-// Käynnistä sovellus — lataa tiedot pilvestä ja renderoi listat
-async function init() {
-  await renderDestinations();
-  await renderDates();
-}
-
-// Sivun latautuessa tarkistetaan kirjautumistila
-checkLogin();
-
 </script>
+
 </body>
 </html>
