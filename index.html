@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8" />
+<title>Poikien reissu 2026</title>
+</head>
+<body>
+<h1>Poikien reissu 2026</h1>
+<button onclick="addDemo()">Lisää testikohde</button>
+<pre id="out"></pre>
+<script>
+const PASSWORD_HASH = 'fc4c0aa66633bd2701b103a7a0e1491dba2223b213c9f0902117967904ae44e2';
+async function sha256(str){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
+(async()=>{const pw=prompt('Salasana');if(await sha256(pw)!==PASSWORD_HASH){alert('Väärä salasana');location.reload();}})();
+
+async function cloudSave(key,list){
+ await fetch('https://api.github.com/repos/heneeeee-crypto/poikien-reissu-2026/dispatches',{
+  method:'POST',
+  headers:{'Accept':'application/vnd.github+json'},
+  body:JSON.stringify({event_type:'save-data',client_payload:{key,list}})
+ });
+}
+
+let demo=[];
+async function addDemo(){demo.push({id:Date.now(),city:'Testi'});await cloudSave('destinations',demo);document.getElementById('out').textContent=JSON.stringify(demo,null,2)}
+</script>
+</body>
+</html>
