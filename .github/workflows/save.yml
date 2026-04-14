@@ -1,0 +1,16 @@
+name: Save data.json
+on:
+  repository_dispatch:
+    types: [save-data]
+jobs:
+  save:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node save.js
+      - run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add data/data.json
+          git commit -m 'Update data.json' || exit 0
+          git push
