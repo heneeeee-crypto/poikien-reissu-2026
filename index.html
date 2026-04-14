@@ -1,272 +1,139 @@
 <!DOCTYPE html>
 <html lang="fi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Poikien reissu 2026</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-  <style>
-  :root {
-    --bg:#0d0f14;
-    --surface:#161920;
-    --surface2:#1e222d;
-    --border:rgba(255,255,255,.07);
-    --accent:#f5a623;
-    --text:#f0ede8;
-    --muted:#6b7280;
-    --green:#22c55e;
-    --red:#ef4444;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    font-family:"DM Sans",sans-serif;
-    background:var(--bg);color:var(--text)
-  }
-
-  /* === LOGIN === */
-  #login-overlay{
-    position:fixed;inset:0;
-    background:var(--bg);
-    display:flex;align-items:center;justify-content:center;
-    z-index:9999
-  }
-  .login-box{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:20px;
-    padding:2.5rem;
-    width:100%;max-width:380px;
-    text-align:center
-  }
-  .login-title{font-family:"Bebas Neue";font-size:2.8rem;color:var(--accent)}
-  .login-input{
-    width:100%;margin:1rem 0;
-    padding:12px;
-    background:var(--surface2);
-    border:1px solid var(--border);
-    color:var(--text);
-    text-align:center;
-    letter-spacing:.15em
-  }
-  .login-btn{
-    width:100%;padding:12px;
-    background:var(--accent);
-    border:none;border-radius:10px;
-    cursor:pointer
-  }
-  .login-error{display:none;color:var(--red);font-size:13px}
-  .login-error.show{display:block}
-
-  /* === HERO === */
-  .hero{text-align:center;padding:5rem 2rem}
-  .hero h1{font-family:"Bebas Neue";font-size:6rem;line-height:.9}
-  .hero span{color:var(--accent)}
-  .logout-btn{
-    background:transparent;border:1px solid var(--border);
-    color:var(--muted);cursor:pointer
-  }
-
-  /* === TABS === */
-  .tabs{display:flex;justify-content:center;margin-bottom:2rem}
-  .tab{
-    padding:10px 24px;border:none;cursor:pointer;
-    background:var(--surface);color:var(--muted)
-  }
-  .tab.active{background:var(--accent);color:#000}
-
-  main{max-width:900px;margin:0 auto;padding:0 1.5rem 4rem}
-  .section{display:none}
-  .section.active{display:block}
-
-  .section-title{
-    font-family:"Bebas Neue";font-size:2.2rem;
-    color:var(--accent);margin-bottom:1.5rem
-  }
-
-  /* === CARDS === */
-  .dest-card,.date-card{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:16px;
-    padding:1.25rem 1.5rem;
-    display:grid;
-    grid-template-columns:1fr auto;
-    gap:1rem;
-    margin-bottom:.75rem;
-    transition:.15s
-  }
-  .dest-card:hover,.date-card:hover{
-    transform:translateY(-2px);
-    border-color:rgba(245,166,35,.3)
-  }
-
-  .dest-name{font-family:"Bebas Neue";font-size:1.6rem}
-  .dest-meta{font-size:13px;color:var(--muted)}
-  .dest-note{font-size:13px;margin-top:6px}
-  .dest-proposer{
-    font-size:11px;font-family:"DM Mono";
-    color:var(--accent);margin-top:4px
-  }
-
-  .vote-col{text-align:center;min-width:60px}
-  .vote-count{font-family:"Bebas Neue";font-size:2.2rem;color:var(--accent)}
-  .vote-label{font-size:10px;color:var(--muted)}
-  .vote-btn{
-    margin-top:6px;
-    border:1px solid var(--border);
-    background:none;color:var(--muted);
-    cursor:pointer;border-radius:6px;
-    padding:4px 10px;transition:.15s
-  }
-  .vote-btn.voted{
-    background:var(--accent);
-    border-color:var(--accent);
-    color:#000
-  }
-
-  .badge{
-    font-size:10px;padding:2px 8px;border-radius:4px;
-    font-family:"DM Mono"
-  }
-  .badge-orange{background:rgba(245,166,35,.12);color:var(--accent)}
-  .badge-green{background:rgba(34,197,94,.12);color:#22c55e}
-
-  .btn-danger{
-    opacity:0;pointer-events:none;
-    transition:.15s
-  }
-  .dest-card:hover .btn-danger{
-    opacity:1;pointer-events:auto
-  }
-
-  .empty{text-align:center;padding:3rem;color:var(--muted)}
-  .empty-icon{font-size:3rem;opacity:.35}
-
-  .toast{
-    position:fixed;bottom:2rem;right:2rem;
-    background:var(--green);color:#000;
-    padding:12px 20px;border-radius:10px;
-    transform:translateY(100px);opacity:0;
-    transition:.3s
-  }
-  .toast.show{transform:none;opacity:1}
-  </style>
+<meta charset="UTF-8" />
+<title>Poikien reissu 2026</title>
 </head>
-
 <body>
-
-<!-- LOGIN -->
-<div id="login-overlay">
-  <div class="login-box">
-    <div class="login-title">POIKIEN<br>REISSU</div>
-    <input class="login-input" id="login-input" type="password"
-           placeholder="********" onkeydown="if(event.key==='Enter')doLogin()">
-    <div class="login-error" id="login-error">Väärä salasana</div>
-    <button class="login-btn" onclick="doLogin()">Kirjaudu</button>
-  </div>
-</div>
-
-<!-- HERO -->
-<div class="hero">
-  <h1>POIKIEN<br><span>REISSU</span><br>2026</h1>
-  <button class="logout-btn" onclick="doLogout()">Kirjaudu ulos</button>
-</div>
-
-<!-- TABS -->
-<div class="tabs">
-  <button class="tab active" onclick="showTab('destinations',this)">🗺 Kohteet</button>
-  <button class="tab" onclick="showTab('dates',this)">📅 Päivämäärät</button>
-</div>
-
-<main>
-  <div id="tab-destinations" class="section active">
-    <div class="section-title">Matkakohteet</div>
-    <div id="destinations-list"></div>
-  </div>
-
-  <div id="tab-dates" class="section">
-    <div class="section-title">Päivämäärät</div>
-    <div id="dates-list"></div>
-  </div>
-</main>
-
-<div class="toast" id="toast"></div>
-
-<!-- ================= FIRESTORE JS ================= -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import {
-  getFirestore, collection, doc, addDoc,
-  deleteDoc, setDoc, onSnapshot,
-  query, orderBy,
-  serverTimestamp, updateDoc, increment
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
-const app = initializeApp({
-  apiKey: "AIzaSyDUtCZzQ53DFfHj9Di84IdMLqz9jjLalkw",
-  authDomain: "reissu26.firebaseapp.com",
-  projectId: "reissu26"
-});
-const db = getFirestore(app);
-
-/* LOGIN */
-const HASH="fc4c0aa66633bd2701b103a7a0e1491dba2223b213c9f0902117967904ae44e2";
-async function sha256(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
-window.doLogin=async()=>{
-  if(await sha256(login-input.value)===HASH){
-    sessionStorage.setItem("auth","1");
-    login-overlay.style.display="none";
-    init();
-  }else login-error.classList.add("show");
+<script>
+// =====================
+// LOGIN
+// =====================
+const PASSWORD_HASH = 'fc4c0aa66633bd2701b103a7a0e1491dba2223b213c9f0902117967904ae44e2';
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
-window.doLogout=()=>{sessionStorage.clear();location.reload()};
-if(sessionStorage.getItem("auth")==="1"){login-overlay.style.display="none";init()}
-
-/* SESSION */
-function sid(){
-  let s=sessionStorage.getItem("sid");
-  if(!s){s=Math.random().toString(36)+Date.now();sessionStorage.setItem("sid",s)}
-  return s;
+async function login() {
+  const pw = prompt('Anna salasana');
+  if (!pw) return;
+  if (await sha256(pw) === PASSWORD_HASH) {
+    sessionStorage.setItem('auth','1');
+    ensureGithubToken();
+    alert('Kirjautuminen onnistui');
+  } else {
+    alert('Väärä salasana');
+  }
 }
-
-/* TOAST */
-function toast(t){const x=toastEl;x.textContent=t;x.classList.add("show");setTimeout(()=>x.classList.remove("show"),2500)}
-const toastEl=document.getElementById("toast");
-
-/* DESTINATIONS */
-const destCol=collection(db,"destinations");
-function init(){
-  onSnapshot(query(destCol,orderBy("votesCount","desc")),snap=>{
-    destinations-list.innerHTML=snap.empty
-      ?`<div class="empty"><div class="empty-icon">🗺</div><p>Ei ehdotuksia</p></div>`
-      :snap.docs.map((d,i)=>{
-        const x=d.data();
-        return `
-        <div class="dest-card">
-          <div>
-            ${i===0&&x.votesCount>0?`<span class="badge badge-orange">🔥 Suosituin</span>`:""}
-            ${x.price?` <span class="badge badge-green">~${x.price}</span>`:""}
-            <div class="dest-name">${x.city}</div>
-            <div class="dest-meta">${x.country||""}</div>
-            ${x.note?`<div class="dest-note">${x.note}</div>`:""}
-          </div>
-          <div class="vote-col">
-            <div class="vote-count">${x.votesCount||0}</div>
-            <div class="vote-label">ääntä</div>
-          </div>
-        </div>`;
-      }).join("");
-  });
+// =====================
+// GITHUB CONFIG
+// =====================
+const GITHUB_OWNER = 'heneeeee-crypto';
+const GITHUB_REPO = 'poikien-reissu-2026';
+const GITHUB_PATH = 'data/data.json';
+function ensureGithubToken() {
+  if (!sessionStorage.getItem('gh_token')) {
+    const t = prompt('Anna GitHub access token (ei tallenneta pysyvästi):');
+    if (t) sessionStorage.setItem('gh_token', t.trim());
+  }
 }
-window.showTab=(n,b)=>{
-  document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));
-  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-  document.getElementById("tab-"+n).classList.add("active");
-  b.classList.add("active");
-};
+async function loadAll() {
+  const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`);
+  const json = await res.json();
+  const data = JSON.parse(atob(json.content));
+  data._sha = json.sha;
+  return data;
+}
+async function saveAll(data, message) {
+  const token = sessionStorage.getItem('gh_token');
+  if (!token) return alert('Token puuttuu');
+  await fetch(
+    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github+json'
+      },
+      body: JSON.stringify({
+        message,
+        content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
+        sha: data._sha
+      })
+    }
+  );
+  alert('Tallennettu GitHubiin');
+}
+(async()=>{ await login(); })();
 </script>
-
+</body>
+</html><!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8" />
+<title>Poikien reissu 2026</title>
+</head>
+<body>
+<script>
+// =====================
+// LOGIN
+// =====================
+const PASSWORD_HASH = 'fc4c0aa66633bd2701b103a7a0e1491dba2223b213c9f0902117967904ae44e2';
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+async function login() {
+  const pw = prompt('Anna salasana');
+  if (!pw) return;
+  if (await sha256(pw) === PASSWORD_HASH) {
+    sessionStorage.setItem('auth','1');
+    ensureGithubToken();
+    alert('Kirjautuminen onnistui');
+  } else {
+    alert('Väärä salasana');
+  }
+}
+// =====================
+// GITHUB CONFIG
+// =====================
+const GITHUB_OWNER = 'heneeeee-crypto';
+const GITHUB_REPO = 'poikien-reissu-2026';
+const GITHUB_PATH = 'data/data.json';
+function ensureGithubToken() {
+  if (!sessionStorage.getItem('gh_token')) {
+    const t = prompt('Anna GitHub access token (ei tallenneta pysyvästi):');
+    if (t) sessionStorage.setItem('gh_token', t.trim());
+  }
+}
+async function loadAll() {
+  const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`);
+  const json = await res.json();
+  const data = JSON.parse(atob(json.content));
+  data._sha = json.sha;
+  return data;
+}
+async function saveAll(data, message) {
+  const token = sessionStorage.getItem('gh_token');
+  if (!token) return alert('Token puuttuu');
+  await fetch(
+    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github+json'
+      },
+      body: JSON.stringify({
+        message,
+        content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
+        sha: data._sha
+      })
+    }
+  );
+  alert('Tallennettu GitHubiin');
+}
+(async()=>{ await login(); })();
+</script>
 </body>
 </html>
