@@ -765,93 +765,46 @@ function doLogout() {
 }
 
 /* =============================================
-   JAETTU TALLENNUS — JSONBin.io
-   Kaikki data tallennetaan JSONBin.io-palveluun
-   jossa se on kaikkien käyttäjien saatavilla
-   julkiselta URL-osoitteelta riippumatta.
+   JAETTU TALLENNUS — Supabase
+   Kaikki data tallennetaan Supabase-tietokantaan
+   jossa se on kaikkien käyttäjien saatavilla.
 
-   Rakenne: yksi "bin" sisältää kaiken datan:
-   { destinations: [...], dates: [...],
-     votes_dest: [...], votes_date: [...] }
+   Taulut: destinations, dates, votes_dest, votes_date
    ============================================= */
 
-// JSONBin.io API-avain (Master Key)
-const JSONBIN_KEY = '$2a$10$vLR2ACJFUOl6ebjgSNh5A.2hbHQ3bSYULh32YchNa5..6O42BqzUO';
+// Supabase-projektin URL ja julkinen anon-avain
+const SUPABASE_URL = 'https://gyhktxhfyiswixabtpal.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_FJYRT-xPeRuo_LB3FEULMA_An_0ggMi';
 
-// Bin-tunnus tallennetaan localStorageen ensimmäisen luonnin jälkeen.
-// Näin sama bin löytyy aina uudelleen eri istunnoilla ja laitteilla
-// — kunhan käyttäjä on kerran avannut sivun ja luonut binin.
-// TÄRKEÄÄ: jos jaat sivuston muille, lisää BIN_ID käsin alla olevaan
-// vakioon sen jälkeen kun olet ajanut sivuston ensimmäistä kertaa.
-const FIXED_BIN_ID = ''; // <-- täytä ensimmäisen ajon jälkeen (katso ohjeet)
-
-const JSONBIN_BASE = 'https://api.jsonbin.io/v3';
-
-// Hae tai luo bin-tunnus.
-// Järjestys: 1) kovakoodattu FIXED_BIN_ID, 2) localStorage, 3) luo uusi
-async function getBinId() {
-  if (FIXED_BIN_ID) return FIXED_BIN_ID;
-  const stored = localStorage.getItem('pr2026_bin_id');
-  if (stored) return stored;
-
-  // Luodaan uusi bin tyhjällä datalla
-  console.log('Luodaan uusi JSONBin...');
-  const res = await fetch(`${JSONBIN_BASE}/b`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Master-Key': JSONBIN_KEY,
-      'X-Bin-Name': 'Poikien reissu 2026',
-      'X-Bin-Private': 'false'   // julkinen — kaikki voivat lukea
-    },
-    body: JSON.stringify({ destinations: [], dates: [], votes_dest: [], votes_date: [] })
-  });
-
-  const data = await res.json();
-  const binId = data.metadata?.id;
-  if (!binId) throw new Error('Binin luonti epäonnistui');
-
-  // Tallennetaan bin-tunnus localStorageen tulevia sessioita varten
-  localStorage.setItem('pr2026_bin_id', binId);
-  console.log('✓ Uusi bin luotu. BIN ID:', binId,
-    '\nLisää tämä FIXED_BIN_ID-muuttujaan ja jaa se kavereiden kanssa!');
-  return binId;
+// Yhteiset HTTP-otsikot kaikille Supabase REST -kutsuille
+function sbHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`
+  };
 }
 
-// Välimuisti — vältetään turhat API-kutsut
-// JSONBin ilmaisversio sallii 10 000 pyyntöä/kk
-let _cache = null;
-
-// Lataa koko data-objekti JSONBinistä (tai välimuistista)
-async function loadAll() {
-  if (_cache) return _cache; // palautetaan välimuistista jos saatavilla
-
-  const binId = await getBinId();
-  const res   = await fetch(`${JSONBIN_BASE}/b/${binId}/latest`, {
-    headers: { 'X-Master-Key': JSONBIN_KEY }
-  });
-  const json = await res.json();
-  // JSONBin palauttaa datan record-kentässä
-  _cache = json.record || { destinations: [], dates: [], votes_dest: [], votes_date: [] };
-  return _cache;
+// Muunna sovelluksen kenttänimet tietokannan sarakkeiden nimiksi.
+// dates-taulussa from→from_date ja to→to_date (SQL-varatut sanat).
+function toDb(key, item) {
+  if (key === 'dates') {
+    const { from, to, ...rest } = item;
+    return { ...rest, from_date: from, to_date: to };
+  }
+  return { ...item };
 }
 
-// Tallenna koko data-objekti JSONBiniin
-async function saveAll(data) {
-  _cache = data; // päivitetään välimuisti heti
-  const binId = await getBinId();
-  await fetch(`${JSONBIN_BASE}/b/${binId}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Master-Key': JSONBIN_KEY
-    },
-    body: JSON.stringify(data)
-  });
+// Muunna tietokannan sarakkeiden nimet takaisin sovelluksen kenttänimiksi
+function fromDb(key, row) {
+  if (key === 'dates') {
+    const { from_date, to_date, ...rest } = row;
+    return { ...rest, from: from_date, to: to_date };
+  }
+  return { ...row };
 }
 
-// Apufunktiot yksittäisten listojen lukemiseen ja tallentamiseen
-// KEYS-objekti määrittelee mitä kenttää JSONBin-datasta käytetään
+// Avainmäärittelyt — taulun nimet Supabasessa
 const KEYS = {
   destinations: 'destinations',
   dates:        'dates',
@@ -859,23 +812,78 @@ const KEYS = {
   votes_date:   'votes_date'
 };
 
+// Lataa kaikki rivit annetusta taulusta Supabasesta
 async function cloudLoad(key) {
   try {
-    const all = await loadAll();
-    return all[key] || [];
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${key}?select=*`, {
+      headers: sbHeaders()
+    });
+    const rows = await res.json();
+    return rows.map(r => fromDb(key, r));
   } catch (e) {
     console.error('Lataus epäonnistui:', e);
     return [];
   }
 }
 
-// Tallenna data jaettuun pilvitallennukseen
+// Tallenna lista Supabaseen vertailevalla synkronoinnilla.
+// Lisää puuttuvat rivit ja poistaa ylimääräiset — ei korvaa koko taulua,
+// joten viittaukset muihin tauluihin säilyvät ehjinä.
 async function cloudSave(key, list) {
   try {
-    const all = await loadAll();
-    all[key]  = list;
-    await saveAll(all);
-    _cache = null; // nollataan välimuisti — seuraava luku hakee tuoreet tiedot
+    const isVoteTable = key === 'votes_dest' || key === 'votes_date';
+    const dbList = list.map(item => toDb(key, item));
+
+    // Haetaan taulun nykyinen tila tietokannasta
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${key}?select=*`, {
+      headers: sbHeaders()
+    });
+    const current = await res.json();
+
+    if (isVoteTable) {
+      // Äänitaulujen avain on (id, sid) -yhdistelmä
+      const makeKey = r => `${r.id}|${r.sid}`;
+      const currentSet = new Set(current.map(makeKey));
+      const newSet     = new Set(dbList.map(makeKey));
+
+      // Lisätään uudet äänet tietokantaan
+      for (const r of dbList.filter(r => !currentSet.has(makeKey(r)))) {
+        await fetch(`${SUPABASE_URL}/rest/v1/${key}`, {
+          method: 'POST',
+          headers: sbHeaders(),
+          body: JSON.stringify(r)
+        });
+      }
+
+      // Poistetaan perutut äänet tietokannasta
+      for (const r of current.filter(r => !newSet.has(makeKey(r)))) {
+        await fetch(
+          `${SUPABASE_URL}/rest/v1/${key}?id=eq.${r.id}&sid=eq.${encodeURIComponent(r.sid)}`,
+          { method: 'DELETE', headers: sbHeaders() }
+        );
+      }
+    } else {
+      // Kohde- ja päivämäärätaulujen avain on id
+      const currentIds = new Set(current.map(r => r.id));
+      const newIds     = new Set(dbList.map(r => r.id));
+
+      // Lisätään uudet rivit tietokantaan
+      for (const r of dbList.filter(r => !currentIds.has(r.id))) {
+        await fetch(`${SUPABASE_URL}/rest/v1/${key}`, {
+          method: 'POST',
+          headers: sbHeaders(),
+          body: JSON.stringify(r)
+        });
+      }
+
+      // Poistetaan rivit joita ei enää listassa
+      for (const r of current.filter(r => !newIds.has(r.id))) {
+        await fetch(`${SUPABASE_URL}/rest/v1/${key}?id=eq.${r.id}`, {
+          method: 'DELETE',
+          headers: sbHeaders()
+        });
+      }
+    }
   } catch (e) {
     console.error('Tallennus epäonnistui:', e);
   }
